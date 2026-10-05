@@ -4,6 +4,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
@@ -27,7 +28,7 @@ public class RegionImplTest {
     private Set<City> cities;
     private Set<ShoppingFacility> shoppingFacilities;
     private Set<DiningFacility> diningFacilities;
-    private Map<UserId, Position> users;
+    private final Map<UserId, Position> users = new HashMap<>();
 
     @BeforeEach
     public void setUp() {
@@ -41,7 +42,7 @@ public class RegionImplTest {
         this.diningFacilities = Set.of(
                 new DiningFacilityImpl(DINING_FACILITY_ID, DINING_FACILITY_POSITION, MAX_RESERVATIONS)
         );
-        this.users = Map.of(USER_ID, USER_POSITION);
+        this.users.put(USER_ID, USER_POSITION);
         this.region = new RegionImpl(WIDTH, HEIGHT, this.cities, this.shoppingFacilities, this.diningFacilities,
                 this.users);
     }
@@ -91,6 +92,23 @@ public class RegionImplTest {
         assertThrows(IllegalArgumentException.class, () ->
                 this.region.getUserPosition(NON_EXISTENT_USER_ID)
         );
+    }
+
+    @Test
+    @DisplayName("Test moving a user in the region")
+    public void testMoveUser() {
+        Position initialPosition = this.region.getUserPosition(USER_ID);
+        assertTrue(this.region.moveUser(USER_ID, Direction.NORTH));
+        assertEquals(new Position(initialPosition.x(), initialPosition.y() - 1), this.region.getUserPosition(USER_ID));
+    }
+
+    @Test
+    @DisplayName("Test moving a user out of bounds fails")
+    public void testMoveUserOutOfBounds() {
+        while (this.region.getUserPosition(USER_ID).y() > 0) {
+            this.region.moveUser(USER_ID, Direction.NORTH);
+        }
+        assertFalse(this.region.moveUser(USER_ID, Direction.NORTH));
     }
 
     @Test

@@ -12,6 +12,8 @@ public interface Region {
 
     Position getUserPosition(UserId userId);
 
+    boolean moveUser(UserId userId, Direction direction);
+
     boolean purchase(UserId userId, FacilityId facilityId, int quantity);
 
     boolean makeReservation(UserId userId, FacilityId facilityId);

@@ -64,6 +64,17 @@ public class RegionImpl implements Region {
     }
 
     @Override
+    public boolean moveUser(final UserId userId, final Direction direction) {
+        this.requireUser(userId);
+        final Position newPosition = this.users.get(userId).moveTowards(direction);
+        if (this.isPositionOutOfBounds(newPosition) || this.users.containsValue(newPosition)) {
+            return false;
+        }
+        this.users.replace(userId, newPosition);
+        return true;
+    }
+
+    @Override
     public boolean purchase(final UserId userId, final FacilityId facilityId, final int quantity) {
         this.requireUser(userId);
         try {
