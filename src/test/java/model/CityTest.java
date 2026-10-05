@@ -28,6 +28,9 @@ public class CityTest {
         assertThrows(IllegalArgumentException.class, () ->
             new City(CITY_ID, new Position(3, 3), new Position(2, 2))
         );
+        assertThrows(IllegalArgumentException.class, () ->
+                new City(CITY_ID, new Position(-1, -2), new Position(2, 2))
+        );
     }
 
     @Test

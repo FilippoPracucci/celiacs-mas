@@ -2,7 +2,13 @@ package model;
 
 public interface Region {
 
-    Position getFacilityPosition(FacilityId facilityId);
+    int getWidth();
+
+    int getHeight();
+
+    Position getShoppingFacilityPosition(FacilityId facilityId);
+
+    Position getDiningFacilityPosition(FacilityId facilityId);
 
     Position getUserPosition(UserId userId);
 

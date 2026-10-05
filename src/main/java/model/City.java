@@ -11,6 +11,9 @@ public record City(String id, Position startVertex, Position endVertex) {
                 "Start vertex coordinates must be less than or equal to end vertex coordinates."
             );
         }
+        if (startVertex.x() < 0 || startVertex.y() < 0) {
+            throw new IllegalArgumentException("Start vertex coordinates must be non-negative.");
+        }
     }
 
     public Collection<Position> getAllPositions() {
