@@ -1,0 +1,25 @@
+{
+  "width": 10,
+  "height": 10,
+  "cities": [
+    { "id": "c1", "startX": 0, "startY": 0, "endX": 5, "endY": 9 },
+    { "id": "c2", "startX": 6, "startY": 0, "endX": 9, "endY": 9 }
+  ],
+  "shoppingFacilities": [
+    { "id": "s1", "x": 1, "y": 1, "quantity": 10 },
+    { "id": "s2", "x": 4, "y": 4, "quantity": 20 },
+    { "id": "s3", "x": 7, "y": 7, "quantity": 8 }
+  ],
+  "diningFacilities": [
+    { "id": "d1", "x": 2, "y": 2, "capacity": 2 },
+    { "id": "d2", "x": 1, "y": 7, "capacity": 10 },
+    { "id": "d3", "x": 9, "y": 2, "capacity": 15 }
+  ],
+  "users": [
+    { "id": "u1", "x": 0, "y": 0 },
+    { "id": "u2", "x": 5, "y": 5 },
+    { "id": "u3", "x": 9, "y": 9 },
+    { "id": "u4", "x": 5, "y": 1 },
+    { "id": "u5", "x": 8, "y": 4 }
+  ]
+}
