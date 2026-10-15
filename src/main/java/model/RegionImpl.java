@@ -32,7 +32,7 @@ public class RegionImpl implements Region {
     }
 
     private boolean isPositionOutOfBounds(final Position position) {
-        return position.x() < 0 || position.y() < 0 || position.x() > this.width || position.y() > this.height;
+        return position.x() < 0 || position.y() < 0 || position.x() >= this.width || position.y() >= this.height;
     }
 
     @Override
@@ -104,6 +104,38 @@ public class RegionImpl implements Region {
             throw new IllegalArgumentException("Supply quantity must be positive.");
         }
         this.getFacilityByIdFrom(this.shoppingFacilities, facilityId).supply(quantity);
+    }
+
+    @Override
+    public String toString() {
+        return "RegionImpl{" +
+                "width=" + width +
+                ", height=" + height +
+                ", cities=" + cities +
+                ", shoppingFacilities=" + shoppingFacilities +
+                ", diningFacilities=" + diningFacilities +
+                ", users=" + users +
+                '}';
+    }
+
+    @Override
+    public String getUserCurrentCity(final UserId userId) {
+        this.requireUser(userId);
+        return this.cities.stream()
+                .filter(city -> city.contains(this.users.get(userId)))
+                .findFirst()
+                .orElseThrow(() -> new IllegalStateException("User is not located in any city."))
+                .id();
+    }
+
+    @Override
+    public int getShoppingFacilityStockQuantity(final FacilityId facilityId) {
+        return this.getFacilityByIdFrom(this.shoppingFacilities, facilityId).getQuantity();
+    }
+
+    @Override
+    public int getDiningFacilityCapacity(final FacilityId facilityId) {
+        return this.getFacilityByIdFrom(this.diningFacilities, facilityId).getActualCapacity();
     }
 
     private <T extends Facility> T getFacilityByIdFrom(final Set<T> facilities, final FacilityId facilityId) {

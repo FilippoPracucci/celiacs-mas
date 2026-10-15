@@ -8,7 +8,11 @@ public interface Region {
 
     Position getShoppingFacilityPosition(FacilityId facilityId);
 
+    int getShoppingFacilityStockQuantity(FacilityId facilityId);
+
     Position getDiningFacilityPosition(FacilityId facilityId);
+
+    int getDiningFacilityCapacity(FacilityId facilityId);
 
     Position getUserPosition(UserId userId);
 
@@ -19,4 +23,6 @@ public interface Region {
     boolean makeReservation(UserId userId, FacilityId facilityId);
 
     void supplyFacility(FacilityId facilityId, int quantity);
+
+    String getUserCurrentCity(UserId userId);
 }

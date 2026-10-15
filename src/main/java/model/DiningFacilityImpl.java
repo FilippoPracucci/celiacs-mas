@@ -50,4 +50,14 @@ public class DiningFacilityImpl implements DiningFacility {
             this.actualCapacity++;
         }
     }
+
+    @Override
+    public String toString() {
+        return "DiningFacilityImpl{" +
+                "id=" + id +
+                ", position=" + position +
+                ", maxCapacity=" + maxCapacity +
+                ", actualCapacity=" + actualCapacity +
+                '}';
+    }
 }

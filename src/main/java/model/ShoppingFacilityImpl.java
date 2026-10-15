@@ -39,4 +39,13 @@ public class ShoppingFacilityImpl implements ShoppingFacility {
     public void supply(final int quantity) {
         this.quantity += quantity;
     }
+
+    @Override
+    public String toString() {
+        return "ShoppingFacilityImpl{" +
+                "id=" + id +
+                ", position=" + position +
+                ", quantity=" + quantity +
+                '}';
+    }
 }
