@@ -26,6 +26,14 @@ dependencies {
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 
+tasks.register<JavaExec>("runCeliacsMAS") {
+    group = "run"
+    classpath = sourceSets.getByName("main").runtimeClasspath
+    mainClass.set("jason.infra.centralised.RunCentralisedMAS")
+    args(file("celiacs.mas2j").absolutePath)
+    javaLauncher.set(javaToolchains.launcherFor(java.toolchain))
+}
+
 tasks.test {
     useJUnitPlatform()
 }
