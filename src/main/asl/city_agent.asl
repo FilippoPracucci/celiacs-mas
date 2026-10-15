@@ -41,6 +41,7 @@ user(u1).
         !!make_purchase(u1, F, 5);
     } else {
         -+facility_status(F, Position, C);
+        !!make_reservation(u1, F);
     }.
 
 -!handle_answer(F, Answer) <-
@@ -54,6 +55,14 @@ user(u1).
 
 -!make_purchase(U, F, Quantity) : user(U) & shopping_facility(F) <-
     .print("Cannot make a purchase from shopping facility ", F);
+    !request_facility_info(F).
+
++!make_reservation(U, F) : user(U) & dining_facility(F) <-
+    .print("Making a reservation for user ", U);
+    .send(F, achieve, make_reservation(U)).
+
+-!make_reservation(U, F) : user(U) & dining_facility(F) <-
+    .print("Cannot make a reservation at dining facility ", F);
     !request_facility_info(F).
 
 +!update_facility_status(Value)[source(F)] : (shopping_facility(F) | dining_facility(F)) & facility_status(F, _, _) <-
