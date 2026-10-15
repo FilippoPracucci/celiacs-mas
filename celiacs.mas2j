@@ -1,0 +1,16 @@
+MAS celiacs {
+    infrastructure: Centralised
+
+    environment: RegionEnvironment("src/main/resources/region.json")
+
+    agents:
+        c1 city_agent;
+        d1 dining_facility_agent;
+        d2 dining_facility_agent;
+        s1 shopping_facility_agent;
+        s2 shopping_facility_agent;
+        u1 user_agent;
+
+    aslSourcePath:
+        "src/main/asl/";
+}
