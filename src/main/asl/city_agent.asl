@@ -6,6 +6,30 @@ dining_facility(d1).
 dining_facility(d2).
 user(u1).
 
+distance(position(X1, Y1), position(X2, Y2), math.abs(X2 - X1) + math.abs(Y2 - Y1)).
+
+closest_shopping_facility(UserPosition, F, Facility_Position) :-
+    facility_status(F, Facility_Position, _) &
+    shopping_facility(F) &
+    distance(UserPosition, Facility_Position, D) &
+    not(
+        facility_status(OtherF, Other_Facility_Position, _) &
+        shopping_facility(OtherF) &
+        distance(UserPosition, Other_Facility_Position, OtherD) &
+        OtherD < D
+    ).
+
+closest_dining_facility(UserPosition, F, Facility_Position) :-
+    facility_status(F, Facility_Position, _) &
+    dining_facility(F) &
+    distance(UserPosition, Facility_Position, D) &
+    not(
+        facility_status(OtherF, Other_Facility_Position, _) &
+        dining_facility(OtherF) &
+        distance(UserPosition, Other_Facility_Position, OtherD) &
+        OtherD < D
+    ).
+
 /* Initial goals */
 
 !collect_facilities_info.
@@ -27,22 +51,12 @@ user(u1).
 
 +!request_facility_info(F) <-
     .print("Requesting information from facility: ", F);
-    if (shopping_facility(F)) {
-        .send(F, askOne, shopping_facility_info(Position, Q), Answer, 2000);
-    } else {
-        .send(F, askOne, dining_facility_info(Position, C), Answer, 2000);
-    };
+    .send(F, askOne, facility_info(Position, Value), Answer, 2000);
     !handle_answer(F, Answer).
 
-+!handle_answer(F, Answer) <-
-    .print("Received information from facility ", F, ": ", Answer);
-    if (shopping_facility(F)) {
-        -+facility_status(F, Position, Q);
-        !!make_purchase(u1, F, 5);
-    } else {
-        -+facility_status(F, Position, C);
-        !!make_reservation(u1, F);
-    }.
++!handle_answer(F, facility_info(Position, Value)) <-
+    .print("Received information from facility ", F, ": (", Position, ", ", Value, ")");
+    +facility_status(F, Position, Value).
 
 -!handle_answer(F, Answer) <-
     .wait(500);
@@ -73,3 +87,10 @@ user(u1).
     .wait(500);
     .print("Impossible to update status. So asking for information.");
     !request_facility_info(F).
+
+/* Test goals */
++?closest_shopping_facility(UserPosition, F, Facility_Position)[source(Sender)] : shopping_facility(F) <-
+    ?closest_shopping_facility(UserPosition, F, Facility_Position).
+
++?closest_dining_facility(UserPosition, F, Facility_Position)[source(Sender)] : dining_facility(F) <-
+    ?closest_dining_facility(UserPosition, F, Facility_Position).

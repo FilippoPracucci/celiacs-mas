@@ -24,7 +24,7 @@ city(c1).
 
 /* Test goals */
 
-+?dining_facility_info(position(X, Y), C) <-
++?facility_info(position(X, Y), C) <-
     ?position(X, Y);
     ?capacity(C).
 

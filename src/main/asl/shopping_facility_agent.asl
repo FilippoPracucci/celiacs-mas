@@ -31,7 +31,7 @@ city(c1).
 
 /* Test goals */
 
-+?shopping_facility_info(position(X, Y), Quantity) <-
++?facility_info(position(X, Y), Quantity) <-
     ?position(X, Y);
     ?quantity(Quantity).
 
