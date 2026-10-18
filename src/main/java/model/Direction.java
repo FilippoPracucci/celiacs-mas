@@ -4,5 +4,9 @@ public enum Direction {
     NORTH,
     SOUTH,
     EAST,
-    WEST
+    WEST;
+
+    public static Direction fromString(final String direction) {
+        return Direction.valueOf(direction.toUpperCase());
+    }
 }

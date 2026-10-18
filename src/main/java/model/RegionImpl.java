@@ -67,7 +67,7 @@ public class RegionImpl implements Region {
     public boolean moveUser(final UserId userId, final Direction direction) {
         this.requireUser(userId);
         final Position newPosition = this.users.get(userId).moveTowards(direction);
-        if (this.isPositionOutOfBounds(newPosition) || this.users.containsValue(newPosition)) {
+        if (this.isPositionOutOfBounds(newPosition)) {
             return false;
         }
         this.users.replace(userId, newPosition);

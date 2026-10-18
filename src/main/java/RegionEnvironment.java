@@ -24,7 +24,7 @@ public class RegionEnvironment extends Environment {
     @Override
     public boolean executeAction(final String agentName, final Structure action) {
         return switch (action.getFunctor()) {
-            case MOVE -> this.region.moveUser(new UserId(agentName), Direction.valueOf(action.getTerm(0).toString()));
+            case MOVE -> this.region.moveUser(new UserId(agentName), Direction.fromString(action.getTerm(0).toString()));
             case PURCHASE -> this.region.purchase(
                     new UserId(action.getTerm(0).toString()),
                     new FacilityId(action.getTerm(1).toString()),
