@@ -9,24 +9,18 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class ShoppingFacilityTest {
     private static final FacilityId FACILITY_ID = new FacilityId("1");
-    private static final Position FACILITY_POSITION = new Position(0, 0);
     private static final int INITIAL_QUANTITY = 10;
 
     private ShoppingFacility shoppingFacility;
 
     @BeforeEach
     public void setUp() {
-        this.shoppingFacility = new ShoppingFacilityImpl(FACILITY_ID, FACILITY_POSITION, INITIAL_QUANTITY);
+        this.shoppingFacility = new ShoppingFacilityImpl(FACILITY_ID, INITIAL_QUANTITY);
     }
 
     @Test
     public void testGetId() {
         assertEquals(FACILITY_ID, this.shoppingFacility.getId());
-    }
-
-    @Test
-    public void testGetPosition() {
-        assertEquals(FACILITY_POSITION, this.shoppingFacility.getPosition());
     }
 
     @Test

@@ -26,8 +26,8 @@ public class RegionImplTest {
 
     private Region region;
     private Set<City> cities;
-    private Set<ShoppingFacility> shoppingFacilities;
-    private Set<DiningFacility> diningFacilities;
+    private Map<ShoppingFacility, Position> shoppingFacilities;
+    private Map<DiningFacility, Position> diningFacilities;
     private final Map<UserId, Position> users = new HashMap<>();
 
     @BeforeEach
@@ -36,11 +36,11 @@ public class RegionImplTest {
                 new City("city1", new Position(0, 0), new Position(2, 2)),
                 new City("city2", new Position(3, 3), new Position(5, 5))
         );
-        this.shoppingFacilities = Set.of(
-                new ShoppingFacilityImpl(SHOPPING_FACILITY_ID, SHOPPING_FACILITY_POSITION, INITIAL_QUANTITY)
+        this.shoppingFacilities = Map.of(
+                new ShoppingFacilityImpl(SHOPPING_FACILITY_ID, INITIAL_QUANTITY), SHOPPING_FACILITY_POSITION
         );
-        this.diningFacilities = Set.of(
-                new DiningFacilityImpl(DINING_FACILITY_ID, DINING_FACILITY_POSITION, MAX_RESERVATIONS)
+        this.diningFacilities = Map.of(
+                new DiningFacilityImpl(DINING_FACILITY_ID, MAX_RESERVATIONS), DINING_FACILITY_POSITION
         );
         this.users.put(USER_ID, USER_POSITION);
         this.region = new RegionImpl(WIDTH, HEIGHT, this.cities, this.shoppingFacilities, this.diningFacilities,
@@ -160,6 +160,7 @@ public class RegionImplTest {
 
     private ShoppingFacility getShoppingFacilityById() {
         return this.shoppingFacilities
+                .keySet()
                 .stream()
                 .filter(f -> f.getId().equals(RegionImplTest.SHOPPING_FACILITY_ID))
                 .findFirst()

@@ -43,26 +43,28 @@ public class RegionLoaderFromJsonFile implements LoaderFromFile<Region> {
                 .collect(Collectors.toSet());
     }
 
-    private Set<ShoppingFacility> parseShoppingFacilitiesFromJsonArray(final JsonArray shoppingFacilities) {
+    private Map<ShoppingFacility, Position> parseShoppingFacilitiesFromJsonArray(final JsonArray shoppingFacilities) {
         return shoppingFacilities.stream()
                 .map(JsonValue::asJsonObject)
-                .map(shoppingFacility -> new ShoppingFacilityImpl(
-                        new FacilityId(shoppingFacility.getString("id")),
-                        new Position(shoppingFacility.getInt("x"), shoppingFacility.getInt("y")),
-                        shoppingFacility.getInt("quantity")
-                ))
-                .collect(Collectors.toSet());
+                .collect(Collectors.toMap(
+                        shoppingFacility -> new ShoppingFacilityImpl(
+                                new FacilityId(shoppingFacility.getString("id")),
+                                shoppingFacility.getInt("quantity")
+                        ),
+                        shoppingFacility -> new Position(shoppingFacility.getInt("x"), shoppingFacility.getInt("y"))
+                ));
     }
 
-    private Set<DiningFacility> parseDiningFacilitiesFromJsonArray(final JsonArray diningFacilities) {
+    private Map<DiningFacility, Position> parseDiningFacilitiesFromJsonArray(final JsonArray diningFacilities) {
         return diningFacilities.stream()
                 .map(JsonValue::asJsonObject)
-                .map(diningFacility -> new DiningFacilityImpl(
-                        new FacilityId(diningFacility.getString("id")),
-                        new Position(diningFacility.getInt("x"), diningFacility.getInt("y")),
-                        diningFacility.getInt("capacity")
-                ))
-                .collect(Collectors.toSet());
+                .collect(Collectors.toMap(
+                        diningFacility -> new DiningFacilityImpl(
+                                new FacilityId(diningFacility.getString("id")),
+                                diningFacility.getInt("capacity")
+                        ),
+                        diningFacility -> new Position(diningFacility.getInt("x"), diningFacility.getInt("y"))
+                ));
     }
 
     private Map<UserId, Position> parseUsersFromJsonArray(final JsonArray users) {

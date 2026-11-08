@@ -1,14 +1,13 @@
 package model;
 
 public class DiningFacilityImpl implements DiningFacility {
+
     private final FacilityId id;
-    private final Position position;
     private final int maxCapacity;
     private int actualCapacity;
 
-    public DiningFacilityImpl(final FacilityId id, final Position position, final int maxCapacity) {
+    public DiningFacilityImpl(final FacilityId id, final int maxCapacity) {
         this.id = id;
-        this.position = position;
         this.maxCapacity = maxCapacity;
         this.actualCapacity = maxCapacity;
     }
@@ -16,11 +15,6 @@ public class DiningFacilityImpl implements DiningFacility {
     @Override
     public FacilityId getId() {
         return this.id;
-    }
-
-    @Override
-    public Position getPosition() {
-        return this.position;
     }
 
     @Override
@@ -55,7 +49,6 @@ public class DiningFacilityImpl implements DiningFacility {
     public String toString() {
         return "DiningFacilityImpl{" +
                 "id=" + id +
-                ", position=" + position +
                 ", maxCapacity=" + maxCapacity +
                 ", actualCapacity=" + actualCapacity +
                 '}';

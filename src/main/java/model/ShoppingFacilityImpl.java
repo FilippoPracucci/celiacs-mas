@@ -1,24 +1,18 @@
 package model;
 
 public class ShoppingFacilityImpl implements ShoppingFacility {
+
     private final FacilityId id;
-    private final Position position;
     private int quantity;
 
-    public ShoppingFacilityImpl(final FacilityId id, final Position position, final int quantity) {
+    public ShoppingFacilityImpl(final FacilityId id, final int quantity) {
         this.id = id;
-        this.position = position;
         this.quantity = quantity;
     }
 
     @Override
     public FacilityId getId() {
         return this.id;
-    }
-
-    @Override
-    public Position getPosition() {
-        return this.position;
     }
 
     @Override
@@ -44,7 +38,6 @@ public class ShoppingFacilityImpl implements ShoppingFacility {
     public String toString() {
         return "ShoppingFacilityImpl{" +
                 "id=" + id +
-                ", position=" + position +
                 ", quantity=" + quantity +
                 '}';
     }

@@ -7,13 +7,14 @@ public class RegionImpl implements Region {
     private final int width;
     private final int height;
     private final Set<City> cities;
-    private final Set<ShoppingFacility> shoppingFacilities;
-    private final Set<DiningFacility> diningFacilities;
+    private final Map<ShoppingFacility, Position> shoppingFacilities;
+    private final Map<DiningFacility, Position> diningFacilities;
     private final Map<UserId, Position> users;
 
     public RegionImpl(final int width, final int height, final Set<City> cities,
-                      final Set<ShoppingFacility> shoppingFacilities, final Set<DiningFacility> diningFacilities,
-                      final Map<UserId, Position> users) {
+            final Map<ShoppingFacility, Position> shoppingFacilities,
+            final Map<DiningFacility, Position> diningFacilities, final Map<UserId, Position> users
+    ) {
         this.width = width;
         this.height = height;
         this.shoppingFacilities = shoppingFacilities;
@@ -47,12 +48,12 @@ public class RegionImpl implements Region {
 
     @Override
     public Position getShoppingFacilityPosition(final FacilityId facilityId) {
-        return this.getFacilityByIdFrom(this.shoppingFacilities, facilityId).getPosition();
+        return this.getFacilityPositionById(this.shoppingFacilities, facilityId);
     }
 
     @Override
     public Position getDiningFacilityPosition(final FacilityId facilityId) {
-        return this.getFacilityByIdFrom(this.diningFacilities, facilityId).getPosition();
+        return this.getFacilityPositionById(this.diningFacilities, facilityId);
     }
 
     @Override
@@ -67,11 +68,26 @@ public class RegionImpl implements Region {
     public boolean moveUser(final UserId userId, final Direction direction) {
         this.requireUser(userId);
         final Position newPosition = this.users.get(userId).moveTowards(direction);
-        if (this.isPositionOutOfBounds(newPosition)) {
+        if (this.isPositionOutOfBounds(newPosition) || this.isPositionOccupied(newPosition)) {
             return false;
         }
         this.users.replace(userId, newPosition);
         return true;
+    }
+
+    @Override
+    public boolean moveUser(final UserId userId, final Direction direction, final Position destination) {
+        this.requireUser(userId);
+        final Position newPosition = this.users.get(userId).moveTowards(direction);
+        if (
+            !this.isPositionOutOfBounds(newPosition) &&
+            newPosition.equals(destination) &&
+            this.isPositionOccupied(newPosition)
+        ) {
+            this.users.replace(userId, newPosition);
+            return true;
+        }
+        return this.moveUser(userId, direction);
     }
 
     @Override
@@ -99,11 +115,12 @@ public class RegionImpl implements Region {
     }
 
     @Override
-    public void supplyFacility(final FacilityId facilityId, final int quantity) {
+    public boolean supplyFacility(final FacilityId facilityId, final int quantity) {
         if (quantity <= 0) {
             throw new IllegalArgumentException("Supply quantity must be positive.");
         }
         this.getFacilityByIdFrom(this.shoppingFacilities, facilityId).supply(quantity);
+        return true;
     }
 
     @Override
@@ -138,9 +155,22 @@ public class RegionImpl implements Region {
         return this.getFacilityByIdFrom(this.diningFacilities, facilityId).getActualCapacity();
     }
 
-    private <T extends Facility> T getFacilityByIdFrom(final Set<T> facilities, final FacilityId facilityId) {
-        return facilities.stream()
+    private <T extends Facility> T getFacilityByIdFrom(final Map<T, Position> facilities, final FacilityId facilityId) {
+        return facilities.keySet().stream()
                 .filter(f -> f.getId().equals(facilityId))
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException(
+                        "Facility with ID " + facilityId + " not found in the region."
+                ));
+    }
+
+    private <T extends Facility> Position getFacilityPositionById(
+        final Map<T, Position> facilities,
+        final FacilityId facilityId
+    ) {
+        return facilities.entrySet().stream()
+                .filter(entry -> entry.getKey().getId().equals(facilityId))
+                .map(Map.Entry::getValue)
                 .findFirst()
                 .orElseThrow(() -> new IllegalArgumentException(
                         "Facility with ID " + facilityId + " not found in the region."
@@ -151,5 +181,9 @@ public class RegionImpl implements Region {
         if (!this.users.containsKey(userId)) {
             throw new IllegalArgumentException("User with ID " + userId + " not found in the region.");
         }
+    }
+
+    private boolean isPositionOccupied(final Position position) {
+        return this.shoppingFacilities.containsValue(position) || this.diningFacilities.containsValue(position);
     }
 }

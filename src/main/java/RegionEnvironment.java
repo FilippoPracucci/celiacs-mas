@@ -24,22 +24,26 @@ public class RegionEnvironment extends Environment {
     @Override
     public boolean executeAction(final String agentName, final Structure action) {
         return switch (action.getFunctor()) {
-            case MOVE -> this.region.moveUser(new UserId(agentName), Direction.fromString(action.getTerm(0).toString()));
-            case PURCHASE -> this.region.purchase(
-                    new UserId(action.getTerm(0).toString()),
-                    new FacilityId(action.getTerm(1).toString()),
+            case MOVE -> this.region.moveUser(
+                new UserId(agentName),
+                Direction.fromString(action.getTerm(0).toString()),
+                new Position(
+                    Integer.parseInt(action.getTerm(1).toString()),
                     Integer.parseInt(action.getTerm(2).toString())
+                )
             );
-            case SUPPLY_FACILITY -> {
-                this.region.supplyFacility(
-                    new FacilityId(action.getTerm(0).toString()),
-                    Integer.parseInt(action.getTerm(1).toString())
-                );
-                yield true;
-            }
+            case PURCHASE -> this.region.purchase(
+                new UserId(action.getTerm(0).toString()),
+                new FacilityId(action.getTerm(1).toString()),
+                Integer.parseInt(action.getTerm(2).toString())
+            );
+            case SUPPLY_FACILITY -> this.region.supplyFacility(
+                new FacilityId(action.getTerm(0).toString()),
+                Integer.parseInt(action.getTerm(1).toString())
+            );
             case MAKE_RESERVATION -> this.region.makeReservation(
-                    new UserId(action.getTerm(0).toString()),
-                    new FacilityId(action.getTerm(1).toString())
+                new UserId(action.getTerm(0).toString()),
+                new FacilityId(action.getTerm(1).toString())
             );
             default -> false;
         };
