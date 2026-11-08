@@ -63,19 +63,23 @@ closest_dining_facility(UserPosition, F, Facility_Position) :-
     .print("Retrying request for facility information.");
     !request_facility_info(F).
 
-+!make_purchase(U, F, Quantity) : user(U) & shopping_facility(F) & facility_status(F, _, _) <-
++!make_purchase(F, Quantity)[source(U)] : user(U) & shopping_facility(F) & facility_status(F, _, _) <-
     .print("Making a purchase of ", Quantity, " items from shopping facility ", F);
     .send(F, achieve, purchase(U, Quantity)).
 
--!make_purchase(U, F, Quantity) : user(U) & shopping_facility(F) <-
+-!make_purchase(F, Quantity)[source(U)] : user(U) & shopping_facility(F) <-
     .print("Cannot make a purchase from shopping facility ", F);
     !request_facility_info(F).
 
-+!make_reservation(U, F) : user(U) & dining_facility(F) <-
++!purchase_failed(U, Quantity)[source(F)] : user(U) & shopping_facility(F) <-
+    .print("Notifying the user ", U, " the purchase failed.");
+    .send(U, achieve, purchase_failed(F, Quantity)).
+
++!make_reservation(F)[source(U)] : user(U) & dining_facility(F) <-
     .print("Making a reservation for user ", U);
     .send(F, achieve, make_reservation(U)).
 
--!make_reservation(U, F) : user(U) & dining_facility(F) <-
+-!make_reservation(F)[source(U)] : user(U) & dining_facility(F) <-
     .print("Cannot make a reservation at dining facility ", F);
     !request_facility_info(F).
 

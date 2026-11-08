@@ -13,16 +13,17 @@ city(c1).
 
 /* Plans */
 
-+!purchase(User, Quantity) : quantity(Q) <-
-    ?stock_status(Quantity, sufficient);
++!purchase(User, Quantity) : quantity(Q) & city(C) <-
+    ?stock_status(Quantity);
     .print("Processing a purchase of ", Quantity, " items");
     .my_name(Agent);
     purchase(User, Agent, Quantity).
 
--!purchase(User, Quantity) : quantity(Q) <-
-    ?stock_status(Quantity, insufficient);
+-!purchase(User, Quantity) : quantity(Q) & city(C) <-
     .print("Cannot process a purchase of ", Quantity, " items due to insufficient stock");
-    !supply_stock(10).
+    .my_name(Agent);
+    !supply_stock(10);
+    .send(C, achieve, purchase_failed(User, Quantity)).
 
 +!supply_stock(Quantity) : quantity(Q) <-
     .print("Supplying ", Quantity, " items in stock");
@@ -35,10 +36,10 @@ city(c1).
     ?position(X, Y);
     ?quantity(Quantity).
 
-+?stock_status(Quantity, sufficient)[source(Sender)] : Quantity > 0 <-
-    ?quantity(Q) > 0;
-    ?quantity(Q) >= Quantity;
-    .print("Shopping Facility has sufficient stock").
-
-+?stock_status(Quantity, insufficient)[source(Sender)] : Quantity > 0 & (quantity(Q) & Q <= 0 | Q < Quantity) <-
-    .print("Shopping Facility has insufficient stock").
++?stock_status(Quantity) : Quantity > 0 & quantity(Q) <-
+    if (Q >= Quantity) {
+        .print("Shopping Facility has sufficient stock");
+    } else {
+        .print("Shopping Facility has insufficient stock");
+        .fail;
+    }.

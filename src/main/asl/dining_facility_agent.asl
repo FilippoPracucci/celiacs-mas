@@ -13,13 +13,12 @@ city(c1).
 /* Plans */
 
 +!make_reservation(User) <-
-    ?capacity_status(C, sufficient);
+    ?capacity_status(C);
     .print("Processing a reservation for user ", User);
     .my_name(Agent);
     make_reservation(User, Agent).
 
 -!make_reservation(User) <-
-    ?capacity_status(C, insufficient);
     .print("Cannot process a reservation for user ", User, " due to full capacity").
 
 /* Test goals */
@@ -28,9 +27,10 @@ city(c1).
     ?position(X, Y);
     ?capacity(C).
 
-+?capacity_status(C, sufficient)[source(Sender)] : C > 0 <-
-    ?capacity(C) > 0;
-    .print("Dining Facility has sufficient capacity for reservations").
-
-+?capacity_status(C, insufficient)[source(Sender)] : C > 0 & (capacity(C) & C <= 0) <-
-    .print("Dining Facility has insufficient capacity for reservations").
++?capacity_status(C) : C > 0 & capacity(C) <-
+    if (C > 0) {
+        .print("Dining Facility has sufficient capacity for reservations");
+    } else {
+        .print("Dining Facility has insufficient capacity for reservations");
+        .fail;
+    }.
