@@ -1,6 +1,8 @@
 package model;
 
 import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class RegionImpl implements Region {
 
@@ -79,15 +81,35 @@ public class RegionImpl implements Region {
     public boolean moveUser(final UserId userId, final Direction direction, final Position destination) {
         this.requireUser(userId);
         final Position newPosition = this.users.get(userId).moveTowards(direction);
-        if (
-            !this.isPositionOutOfBounds(newPosition) &&
-            newPosition.equals(destination) &&
-            this.isPositionOccupied(newPosition)
-        ) {
+        if (!this.isPositionOutOfBounds(newPosition) && newPosition.equals(destination)) {
             this.users.replace(userId, newPosition);
             return true;
         }
         return this.moveUser(userId, direction);
+    }
+
+    @Override
+    public boolean enterFacility(final UserId userId, final FacilityId facilityId) {
+        this.requireUser(userId);
+        final Position facilityPosition = this.getAnyFacilityPositionById(facilityId);
+        if (!this.isUserAdjacentToFacility(this.users.get(userId), facilityPosition)) {
+            return false;
+        }
+        this.users.replace(userId, facilityPosition);
+        return true;
+    }
+
+    @Override
+    public boolean exitFacility(UserId userId, FacilityId facilityId) {
+        this.requireUser(userId);
+        final Position facilityPosition = this.getAnyFacilityPositionById(facilityId);
+        if (!this.users.get(userId).equals(facilityPosition)) {
+            return false;
+        }
+        final int randomDirectionIndex = new Random().nextInt(Direction.values().length);
+        final Direction randomDirection = Direction.values()[randomDirectionIndex];
+        this.moveUser(userId, randomDirection);
+        return true;
     }
 
     @Override
@@ -177,6 +199,16 @@ public class RegionImpl implements Region {
                 ));
     }
 
+    private Position getAnyFacilityPositionById(final FacilityId facilityId) {
+        return this.getFacilityPositionById(
+            Stream.concat(
+                this.shoppingFacilities.entrySet().stream(),
+                this.diningFacilities.entrySet().stream()
+            ).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)),
+            facilityId
+        );
+    }
+
     private void requireUser(final UserId userId) {
         if (!this.users.containsKey(userId)) {
             throw new IllegalArgumentException("User with ID " + userId + " not found in the region.");
@@ -185,5 +217,10 @@ public class RegionImpl implements Region {
 
     private boolean isPositionOccupied(final Position position) {
         return this.shoppingFacilities.containsValue(position) || this.diningFacilities.containsValue(position);
+    }
+
+    private boolean isUserAdjacentToFacility(final Position userPosition, final Position facilityPosition) {
+        return Math.abs(userPosition.x() - facilityPosition.x()) +
+               Math.abs(userPosition.y() - facilityPosition.y()) == 1;
     }
 }

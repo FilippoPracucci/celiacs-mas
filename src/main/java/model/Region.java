@@ -20,6 +20,10 @@ public interface Region {
 
     boolean moveUser(UserId userId, Direction direction);
 
+    boolean enterFacility(UserId userId, FacilityId facilityId);
+
+    boolean exitFacility(UserId userId, FacilityId facilityId);
+
     boolean purchase(UserId userId, FacilityId facilityId, int quantity);
 
     boolean makeReservation(UserId userId, FacilityId facilityId);
