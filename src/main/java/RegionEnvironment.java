@@ -10,6 +10,8 @@ import model.*;
 public class RegionEnvironment extends Environment {
 
     private static final String MOVE = "move";
+    private static final String ENTER_FACILITY = "enter_facility";
+    private static final String EXIT_FACILITY = "exit_facility";
     private static final String MAKE_RESERVATION = "make_reservation";
     private static final String PURCHASE = "purchase";
     private static final String SUPPLY_FACILITY = "supply_facility";
@@ -31,6 +33,14 @@ public class RegionEnvironment extends Environment {
                     Integer.parseInt(action.getTerm(1).toString()),
                     Integer.parseInt(action.getTerm(2).toString())
                 )
+            );
+            case ENTER_FACILITY -> this.region.enterFacility(
+                new UserId(agentName),
+                new FacilityId(action.getTerm(0).toString())
+            );
+            case EXIT_FACILITY -> this.region.exitFacility(
+                new UserId(agentName),
+                new FacilityId(action.getTerm(0).toString())
             );
             case PURCHASE -> this.region.purchase(
                 new UserId(action.getTerm(0).toString()),
