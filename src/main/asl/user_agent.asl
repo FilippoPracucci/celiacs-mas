@@ -67,14 +67,15 @@ retries_left(5).
     .send(C, achieve, make_purchase(F, PurchaseQuantity)).
 
 +!handle_purchase(F, Facility_Position, PurchaseQuantity) : position(X, Y) & current_city(C) &
+        not(same_position(position(X, Y), Facility_Position)) <-
+    !enter_facility(F, Facility_Position);
+    !handle_purchase(F, Facility_Position, PurchaseQuantity).
+
++!handle_purchase(F, Facility_Position, PurchaseQuantity) : position(X, Y) & current_city(C) &
         same_position(position(X, Y), Facility_Position) <-
     .print("User reached shopping facility ", F, " at position ", Facility_Position);
     .my_name(User);
     .send(C, achieve, make_purchase(F, PurchaseQuantity)).
-
--!handle_purchase(F, Facility_Position, PurchaseQuantity) : position(X, Y) <-
-    !move_towards_facility(Facility_Position);
-    !handle_purchase(F, Facility_Position, PurchaseQuantity).
 
 /* Plans for making a reservation at a dining facility */
 
@@ -87,31 +88,28 @@ retries_left(5).
     !handle_reservation(F, Facility_Position).
 
 +!handle_reservation(F, Facility_Position) : position(X, Y) & current_city(C) &
-        same_position(position(X, Y), Facility_Position) <-
+        not(same_position(position(X, Y), Facility_Position)) <-
     .print("User reached dining facility ", F, " at position ", Facility_Position);
     .my_name(User);
-    .send(C, achieve, make_reservation(F)).
-
--!handle_reservation(F, Facility_Position) : position(X, Y) <-
-    !move_towards_facility(Facility_Position);
-    !handle_reservation(F, Facility_Position).
+    .send(C, achieve, make_reservation(F));
+    !enter_facility(F, Facility_Position).
 
 /* Plans for moving towards a facility */
 
-+!move_towards_facility(Facility_Position) : position(X, Y) & same_position(position(X, Y), Facility_Position) <-
++!move_towards_facility(F, Facility_Position) : position(X, Y) & same_position(position(X, Y), Facility_Position) <-
     true.
 
-+!move_towards_facility(Facility_Position) : position(X, Y) <-
++!move_towards_facility(F, Facility_Position) : position(X, Y) <-
     .print("User is moving towards facility: ", Facility_Position);
     ?directions(position(X, Y), Facility_Position, PrimaryDirection, SecondaryDirection);
-    !try_direction(Facility_Position, PrimaryDirection, SecondaryDirection).
+    !try_direction(F, Facility_Position, PrimaryDirection, SecondaryDirection).
 
-+!try_direction(position(DestX, DestY), PrimaryDirection, SecondaryDirection) : position(X, Y) <-
++!try_direction(F, position(DestX, DestY), PrimaryDirection, SecondaryDirection) : position(X, Y) <-
     .print("Trying direction: ", PrimaryDirection);
     move(PrimaryDirection, DestX, DestY);
-    !move_towards_facility(position(DestX, DestY)).
+    !enter_facility(F, position(DestX, DestY)).
 
--!try_direction(position(DestX, DestY), PrimaryDirection, SecondaryDirection) : position(X, Y) <-
+-!try_direction(F, position(DestX, DestY), PrimaryDirection, SecondaryDirection) : position(X, Y) <-
     .print("Failed to move in direction: ", PrimaryDirection, "; so trying direction: ", SecondaryDirection);
     !avoid_obstacle(position(DestX, DestY), PrimaryDirection, SecondaryDirection).
 
@@ -125,3 +123,14 @@ retries_left(5).
     opposite_direction(PrimaryDirection, OppositePrimaryDirection);
     opposite_direction(SecondaryDirection, OppositeSecondaryDirection);
     !try_direction(position(DestX, DestY), OppositePrimaryDirection, OppositeSecondaryDirection).
+
+/* Plans for entering and exiting facilities */
+
++!enter_facility(F, Facility_Position) <-
+    .print("User is trying to enter facility: ", F);
+    enter_facility(F, Facility_Position);
+    .print("User successfully entered facility: ", F).
+
+-!enter_facility(F, Facility_Position) <-
+    .print("User failed to enter facility: ", F, " because he/she is not adjacent to it.");
+    !move_towards_facility(F, Facility_Position).
