@@ -108,8 +108,7 @@ public class RegionImpl implements Region {
         }
         final int randomDirectionIndex = new Random().nextInt(Direction.values().length);
         final Direction randomDirection = Direction.values()[randomDirectionIndex];
-        this.moveUser(userId, randomDirection);
-        return true;
+        return this.moveUser(userId, randomDirection);
     }
 
     @Override
