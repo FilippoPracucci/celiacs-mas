@@ -72,7 +72,7 @@ exit_retries_left(4).
 
 +!handle_purchase(F, Facility_Position, PurchaseQuantity) : position(X, Y) & current_city(C) &
         not(same_position(position(X, Y), Facility_Position)) <-
-    !enter_facility(F, Facility_Position);
+    !move_towards(facility(F), Facility_Position);
     !handle_purchase(F, Facility_Position, PurchaseQuantity).
 
 +!handle_purchase(F, Facility_Position, PurchaseQuantity) : position(X, Y) & current_city(C) &
@@ -93,10 +93,16 @@ exit_retries_left(4).
 
 +!handle_reservation(F, Facility_Position) : position(X, Y) & current_city(C) &
         not(same_position(position(X, Y), Facility_Position)) <-
-    .print("User reached dining facility ", F, " at position ", Facility_Position);
+    .print("User making a reservation and moving towards dining facility ", F, " at position ", Facility_Position);
     .my_name(User);
     .send(C, achieve, make_reservation(F));
-    !enter_facility(F, Facility_Position).
+    !move_towards(facility(F), Facility_Position).
+
++!handle_reservation(F, Facility_Position) : position(X, Y) & current_city(C) &
+        same_position(position(X, Y), Facility_Position) <-
+    .print("User is at dining facility ", F, " so making a reservation");
+    .my_name(User);
+    .send(C, achieve, make_reservation(F)).
 
 /* Plans for moving towards a destination */
 
