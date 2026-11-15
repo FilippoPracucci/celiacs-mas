@@ -11,14 +11,15 @@ directions(position(StartX, StartY), position(EndX, EndY), east, north) :- Start
 directions(position(StartX, StartY), position(EndX, EndY), west, north).
 
 // opposite_direction(+Direction, -OppositeDirection)
-opposite_direction(est, ovest).
-opposite_direction(ovest, est).
-opposite_direction(nord, sud).
-opposite_direction(sud, nord).
+opposite_direction(east, west).
+opposite_direction(west, east).
+opposite_direction(north, south).
+opposite_direction(south, north).
 
 random_between(X, Y, math.floor(R *  (Y - X + 1) + X)) :- .random(R).
 
-retries_left(5).
+purchase_retries_left(5).
+exit_retries_left(4).
 
 /* Initial goals */
 
@@ -29,10 +30,13 @@ retries_left(5).
 /* Percepts */
 
 +position(X, Y) : not home(_) <-
-    .print("User is at home: position ", X, ", ", Y);
+    .print("User is at home: position(", X, ", ", Y, ")");
     +home(position(X, Y)).
 
-+position(X, Y) <-
++position(X, Y) : home(HomePosition) & same_position(position(X, Y), HomePosition) <-
+    .print("User is at home: position(", X, ", ", Y, ")").
+
++position(X, Y) : home(HomePosition) & not(same_position(position(X, Y), HomePosition)) <-
     .print("User is at position: ", X, ", ", Y).
 
 +current_city(C) <-
@@ -53,13 +57,13 @@ retries_left(5).
 +!handle_purchase_response(closest_shopping_facility(_, F, Facility_Position), PurchaseQuantity) : current_city(C) <-
     !handle_purchase(F, Facility_Position, PurchaseQuantity).
 
-+!purchase_failed(F, PurchaseQuantity) : retries_left(Retries) & Retries > 0 <-
++!purchase_failed(F, PurchaseQuantity) : purchase_retries_left(Retries) & Retries > 0 <-
     .wait(500);
     .print("Retrying purchase. Retries left: ", Retries);
-    -+retries_left(Retries - 1);
+    -+purchase_retries_left(Retries - 1);
     !handle_purchase(F, PurchaseQuantity).
 
-+!purchase_failed(F, PurchaseQuantity) : retries_left(Retries) & Retries == 0 <-
++!purchase_failed(F, PurchaseQuantity) : purchase_retries_left(Retries) & Retries == 0 <-
     .print("Failed to purchase ", PurchaseQuantity, " items after the maximum number of retries. Aborting purchase process.").
 
 +!handle_purchase(F, PurchaseQuantity) : position(X, Y) & current_city(C) <-
@@ -94,43 +98,83 @@ retries_left(5).
     .send(C, achieve, make_reservation(F));
     !enter_facility(F, Facility_Position).
 
-/* Plans for moving towards a facility */
+/* Plans for moving towards a destination */
 
-+!move_towards_facility(F, Facility_Position) : position(X, Y) & same_position(position(X, Y), Facility_Position) <-
++!move_towards(Destination, Destination_Position) : position(X, Y) &
+        same_position(position(X, Y), Destination_Position) <-
     true.
 
-+!move_towards_facility(F, Facility_Position) : position(X, Y) <-
-    .print("User is moving towards facility: ", Facility_Position);
-    ?directions(position(X, Y), Facility_Position, PrimaryDirection, SecondaryDirection);
-    !try_direction(F, Facility_Position, PrimaryDirection, SecondaryDirection).
++!move_towards(Destination, Destination_Position) : position(X, Y) <-
+    .print("User is moving towards ", Destination, ": ", Destination_Position);
+    ?directions(position(X, Y), Destination_Position, PrimaryDirection, SecondaryDirection);
+    !try_direction(Destination, Destination_Position, PrimaryDirection, SecondaryDirection).
 
-+!try_direction(F, position(DestX, DestY), PrimaryDirection, SecondaryDirection) : position(X, Y) <-
++!try_direction(facility(F), position(DestX, DestY), PrimaryDirection, SecondaryDirection) : position(X, Y) <-
     .print("Trying direction: ", PrimaryDirection);
     move(PrimaryDirection, DestX, DestY);
     !enter_facility(F, position(DestX, DestY)).
 
--!try_direction(F, position(DestX, DestY), PrimaryDirection, SecondaryDirection) : position(X, Y) <-
++!try_direction(home, position(DestX, DestY), PrimaryDirection, SecondaryDirection) : position(X, Y) <-
+    .print("Trying direction: ", PrimaryDirection);
+    move(PrimaryDirection, DestX, DestY);
+    !move_towards(home, position(DestX, DestY)).
+
+-!try_direction(Destination, position(DestX, DestY), PrimaryDirection, SecondaryDirection) : position(X, Y) <-
     .print("Failed to move in direction: ", PrimaryDirection, "; so trying direction: ", SecondaryDirection);
-    !avoid_obstacle(position(DestX, DestY), PrimaryDirection, SecondaryDirection).
+    !avoid_obstacle(Destination, position(DestX, DestY), PrimaryDirection, SecondaryDirection).
 
-+!avoid_obstacle(position(DestX, DestY), PrimaryDirection, SecondaryDirection) : position(X, Y) <-
-    .print("Avoiding obstacle while moving towards: ", position(DestX, DestY), " from position: ", position(X, Y));
-    move(SecondaryDirection, DX, DY);
-    !move_towards_facility(position(DestX, DestY)).
++!avoid_obstacle(facility(F), position(DestX, DestY), PrimaryDirection, SecondaryDirection) : position(X, Y) <-
+    .print("Avoiding obstacle while moving towards ", position(DestX, DestY), " from ", position(X, Y));
+    move(SecondaryDirection, DestX, DestY);
+    !enter_facility(F, position(DestX, DestY)).
 
--!avoid_obstacle(position(DestX, DestY), PrimaryDirection, SecondaryDirection) : position(X, Y) <-
++!avoid_obstacle(home, position(DestX, DestY), PrimaryDirection, SecondaryDirection) : position(X, Y) <-
+    .print("Avoiding obstacle while moving towards ", position(DestX, DestY), " from ", position(X, Y));
+    move(SecondaryDirection, DestX, DestY);
+    !move_towards(home, position(DestX, DestY)).
+
+-!avoid_obstacle(Destination, position(DestX, DestY), PrimaryDirection, SecondaryDirection) : position(X, Y) <-
     .print("Failed to avoid obstacle in direction: ", PrimaryDirection, "; so trying direction: ", SecondaryDirection);
     opposite_direction(PrimaryDirection, OppositePrimaryDirection);
     opposite_direction(SecondaryDirection, OppositeSecondaryDirection);
-    !try_direction(position(DestX, DestY), OppositePrimaryDirection, OppositeSecondaryDirection).
+    !try_direction(Destination, position(DestX, DestY), OppositePrimaryDirection, OppositeSecondaryDirection).
 
 /* Plans for entering and exiting facilities */
 
 +!enter_facility(F, Facility_Position) <-
     .print("User is trying to enter facility: ", F);
     enter_facility(F, Facility_Position);
-    .print("User successfully entered facility: ", F).
+    .print("User successfully entered facility: ", F);
+    .wait(2000);
+    !exit_facility(F, Facility_Position).
 
 -!enter_facility(F, Facility_Position) <-
     .print("User failed to enter facility: ", F, " because he/she is not adjacent to it.");
-    !move_towards_facility(F, Facility_Position).
+    !move_towards(facility(F), Facility_Position).
+
++!exit_facility(F, Facility_Position) : exit_retries_left(Retries) & Retries > 0 <-
+    .print("User is trying to exit facility: ", F);
+    exit_facility(F, Facility_Position);
+    .print("User successfully exited facility: ", F);
+    !return_home.
+
++!exit_facility(F, Facility_Position) : exit_retries_left(Retries) & Retries == 0 <-
+    .print("User failed to exit facility: ", F, " after the maximum number of retries. Aborting exit process.").
+
+-!exit_facility(F, Facility_Position) <-
+    .print("User failed to exit facility: ", F, " . Retry with another direction.");
+    .wait(500);
+    -+exit_retries_left(Retries - 1);
+    !exit_facility(F, Facility_Position).
+
+/* Plans for returning home */
+
++!return_home : position(X, Y) & home(HomePosition) &
+        not(same_position(position(X, Y), HomePosition)) <-
+    .print("User is returning home");
+    !move_towards(home, HomePosition);
+    !return_home.
+
++!return_home : position(X, Y) & home(HomePosition) &
+        same_position(position(X, Y), HomePosition) <-
+    .print("User is already at home").
