@@ -23,9 +23,21 @@ exit_retries_left(4).
 
 /* Initial goals */
 
-// !purchase.
-!make_reservation.
+!choose_initial_goal.
 
++!choose_initial_goal <-
+    ?random_between(1, 2, InitialGoal);
+    !execute_initial_goal(InitialGoal).
+
++!execute_initial_goal(1) <-
+    .my_name(User);
+    .print("User ", User, " goal: make a purchase!");
+    !purchase.
+
++!execute_initial_goal(2) <-
+    .my_name(User);
+    .print("User ", User, " goal: make a reservation!");
+    !make_reservation.
 
 /* Percepts */
 
@@ -55,7 +67,9 @@ exit_retries_left(4).
     !handle_purchase_response(Answer, PurchaseQuantity).
 
 +!handle_purchase_response(closest_shopping_facility(_, F, Facility_Position), PurchaseQuantity) : current_city(C) <-
-    !handle_purchase(F, Facility_Position, PurchaseQuantity).
+    !handle_purchase(F, Facility_Position, PurchaseQuantity);
+    .wait(2000);
+    !exit_facility(F, Facility_Position).
 
 +!purchase_failed(F, PurchaseQuantity) : purchase_retries_left(Retries) & Retries > 0 <-
     .wait(500);
@@ -89,7 +103,9 @@ exit_retries_left(4).
     !handle_reservation_response(Answer).
 
 +!handle_reservation_response(closest_dining_facility(_, F, Facility_Position)) : current_city(C) <-
-    !handle_reservation(F, Facility_Position).
+    !handle_reservation(F, Facility_Position);
+    .wait(2000);
+    !exit_facility(F, Facility_Position).
 
 +!handle_reservation(F, Facility_Position) : position(X, Y) & current_city(C) &
         not(same_position(position(X, Y), Facility_Position)) <-
@@ -150,9 +166,7 @@ exit_retries_left(4).
 +!enter_facility(F, Facility_Position) <-
     .print("User is trying to enter facility: ", F);
     enter_facility(F, Facility_Position);
-    .print("User successfully entered facility: ", F);
-    .wait(2000);
-    !exit_facility(F, Facility_Position).
+    .print("User successfully entered facility: ", F).
 
 -!enter_facility(F, Facility_Position) <-
     .print("User failed to enter facility: ", F, " because he/she is not adjacent to it.");
